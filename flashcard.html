@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .flashcard {
+            width: 200px;
+            height: 100px;
+            margin: 10px;
+            perspective: 1000px;
+        }
+        .flashcard-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard.is-flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .flashcard-front {
+            background-color: #f9f9f9;
+            font-size: 14px;
+        }
+        .flashcard-back {
+            background-color: #4caf50;
+            color: white;
+            transform: rotateY(180deg);
+            font-size: 14px;
+        }
+        #flashcards {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Flashcard Generator</h1>
+<p>Upload a text file with terms and definitions separated by a colon (e.g., "Term: Definition").</p>
+<input type="file" id="fileInput">
+<div id="flashcards"></div>
+
+<script>
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            generateFlashcards(parseFlashcards(text));
+        };
+        reader.readAsText(file);
+    });
+
+    function parseFlashcards(text) {
+        const lines = text.split('\n');
+        const flashcards = [];
+        lines.forEach(line => {
+            const parts = line.split(':');
+            if (parts.length === 2) {
+                flashcards.push({
+                    term: parts[0].trim(),
+                    definition: parts[1].trim()
+                });
+            }
+        });
+        return flashcards;
+    }
+
+    function generateFlashcards(flashcards) {
+        const container = document.getElementById('flashcards');
+        container.innerHTML = '';
+
+        flashcards.forEach(card => {
+            const flashcard = document.createElement('div');
+            flashcard.className = 'flashcard';
+
+            const inner = document.createElement('div');
+            inner.className = 'flashcard-inner';
+
+            const front = document.createElement('div');
+            front.className = 'flashcard-front';
+            front.textContent = card.term;
+
+            const back = document.createElement('div');
+            back.className = 'flashcard-back';
+            back.textContent = card.definition;
+
+            inner.appendChild(front);
+            inner.appendChild(back);
+            flashcard.appendChild(inner);
+            container.appendChild(flashcard);
+
+            flashcard.addEventListener('click', () => {
+                flashcard.classList.toggle('is-flipped');
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
+
